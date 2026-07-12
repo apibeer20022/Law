@@ -36,7 +36,18 @@
                 <button onclick="resetAndShuffle()" class="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-medium rounded-xl transition">🔀 สลับข้อใหม่</button>
             </div>
         </div>
-
+<!-- ⚠️ กล่องแจ้งเตือนการสแกนด้วย AI -->
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-xs mb-6">
+            <div class="flex items-start gap-3">
+                <div class="text-amber-600 text-lg shrink-0">🤖</div>
+                <div>
+                    <h4 class="font-semibold text-amber-900 text-sm">บันทึกช่วยจำจากระบบ</h4>
+                    <p class="text-amber-800 text-xs mt-0.5 leading-relaxed">
+                        ข้อมูลส่วนใหญ่ในคลังข้อสอบนี้ถูกสแกนและแปลงไฟล์โดยใช้ AI ถ้ารู้สึกว่าโจทย์หรือชอยส์ข้อไหนดูแปลกๆ หรือคลาดเคลื่อน พี่เบียร์และเพื่อนๆ สามารถคลิกปุ่ม <span class="font-bold text-indigo-600">"✏️ แก้ไขเฉลย"</span> ที่ข้อนั้น หรือฝากข้อความแจ้งไว้ใน <span class="font-bold text-indigo-600">"💌 กล่องจดหมาย"</span> ที่มุมขวาล่างเพื่อดำเนินการแก้ไขได้เลยครับ ขอบคุณครับ
+                    </p>
+                </div>
+            </div>
+        </div>
         <div id="questions-container" class="space-y-6">
             <div class="text-center py-12 text-slate-400 font-medium">⏳ กำลังดาวน์โหลดและซิงค์ข้อมูลเฉลยล่าสุดจาก Supabase...</div>
         </div>
