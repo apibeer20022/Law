@@ -7,12 +7,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Noto Sans Thai', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-24">
 
     <nav class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -25,18 +26,39 @@
         </div>
     </nav>
 
+    <div id="timer-dashboard" class="bg-amber-500 text-white sticky top-[52px] z-40 shadow-sm hidden transition-all">
+        <div class="max-w-4xl mx-auto px-4 py-2 flex justify-between items-center font-bold text-sm sm:text-base">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-stopwatch animate-pulse"></i> โหมดฝึกทำข้อสอบจับเวลา
+            </div>
+            <div id="countdown-clock" class="bg-black/20 px-3 py-0.5 rounded-lg tracking-wider text-lg font-mono">
+                00:00
+            </div>
+        </div>
+    </div>
+
     <main class="max-w-4xl mx-auto px-4 py-8">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h2 id="current-title" class="text-2xl font-bold text-slate-900">ชุดข้อสอบประจำปี 2566</h2>
-                <p class="text-slate-500 text-sm mt-1">ฐานข้อมูล: <span class="text-emerald-600 font-semibold">Supabase Cloud Connected 🟢</span> (สลับข้ออัตโนมัติ)</p>
+                <p id="info-text" class="text-slate-500 text-sm mt-1">ฐานข้อมูล: <span class="text-emerald-600 font-semibold">Supabase Cloud Connected 🟢</span> (สลับข้ออัตโนมัติ)</p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-wrap w-full md:w-auto">
+                <button id="btn-exam-mode" onclick="toggleExamMode()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-xl shadow-sm transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-hourglass-start"></i> เริ่มโหมดจับเวลา
+                </button>
                 <button onclick="showAllAnswers()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium rounded-xl shadow-sm transition">👁️ ดูเฉลยทั้งหมด</button>
                 <button onclick="resetAndShuffle()" class="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-medium rounded-xl transition">🔀 สลับข้อใหม่</button>
             </div>
         </div>
-<!-- ⚠️ กล่องแจ้งเตือนการสแกนด้วย AI -->
+
+        <div id="result-card" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-6 text-center hidden transition-all">
+            <div class="text-amber-500 text-4xl mb-2">🏆</div>
+            <h3 class="text-xl font-bold text-emerald-900">สรุปคะแนนสอบของคุณเบียร์</h3>
+            <p id="score-display" class="text-4xl font-extrabold text-emerald-600 my-2">0 / 0</p>
+            <p class="text-slate-600 text-sm">ระบบได้ทำการตรวจคะแนนและเปิดแถบข้อความเฉลยที่ถูกต้องให้เรียบร้อยแล้ว ด้านล่างนี้ครับ 👇</p>
+        </div>
+
         <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-xs mb-6">
             <div class="flex items-start gap-3">
                 <div class="text-amber-600 text-lg shrink-0">🤖</div>
@@ -44,11 +66,19 @@
                     <h4 class="font-semibold text-amber-900 text-sm">อ่านก่อนนน!⚠️</h4>
                     <p class="text-amber-800 text-xs mt-0.5 leading-relaxed">
                         ข้อมูลส่วนใหญ่ในคลังข้อสอบนี้ถูกสแกนและแปลงไฟล์โดยใช้ AI ถ้ารู้สึกว่าโจทย์หรือชอยส์ข้อไหนดูแปลกๆ ให้ทักมาบอกให้แก้ไขได้เลยคร้าบบ ❤️
-                        </div>
+                    </p>
+                </div>
             </div>
         </div>
+
         <div id="questions-container" class="space-y-6">
             <div class="text-center py-12 text-slate-400 font-medium">⏳ กำลังดาวน์โหลดและซิงค์ข้อมูลเฉลยล่าสุดจาก Supabase...</div>
+        </div>
+
+        <div id="submit-area" class="mt-8 text-center hidden">
+            <button onclick="submitExam()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-md hover:shadow-lg transition-all transform active:scale-95 w-full sm:w-64">
+                <i class="fa-solid fa-paper-plane mr-1.5"></i> ส่งข้อสอบและตรวจคะแนน
+            </button>
         </div>
     </main>
 
@@ -60,8 +90,6 @@
         // 🚨 CONFIG SUPABASE (อ้างอิงจาก Project ID ของพี่เบียร์)
         const SUPABASE_PROJECT_ID = "dbeqswmurvmxlqgcrrkf";
         const SUPABASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co`;
-        
-        // คำแนะนำสำหรับพี่เบียร์: ก๊อปปี้ Anon Key จากหน้าเว็บ Supabase (Project Settings -> API) มาใส่ที่นี่ครับ
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRiZXFzd211cnZteGxxZ2NycmtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTg0NzAsImV4cCI6MjA5OTQzNDQ3MH0.yQTqAEuHFjnPb2B4su7s875-Fkd0kvpa6PXoC0VLQMI"; 
 
         const rawQuestions = {
@@ -124,14 +152,14 @@
                 { id: 54, q: "สถานที่ในข้อใด ที่ต้องขออนุญาตเป็นสถานพยาบาลตามกฎหมายว่าด้วยสถานพยาบาล", choices: ["ร้านขายยาแผนโบราณ", "ร้านนวดเพื่อสุขภาพ", "ตรวจวัดสายตาประกอบแว่น", "ร้านสปาเพื่อสุขภาพ", "ร้านทำฟันจัดฟันแฟชั่น"], ans: 5 },
                 { id: 55, q: "พระราชบัญญัติสถานพยาบาล พ.ศ. 2541 ได้ควบคุมสถานพยาบาลประเภทใดบ้าง", choices: ["สถานที่ที่ไม่รับผู้ป่วยไว้ค้างคืน และสถานผดุงครรภ์", "สถานผดุงครรภ์ และสถานทันตกรรม", "สถานที่ที่รับผู้ป่วยไว้ค้างคืน และสถานทันตกรรม", "สถานที่ที่รับผู้ป่วยไว้ค้างคืน และไม่รับผู้ป่วยไว้ค้างคืน", "สถานที่ที่รับผู้ป่วยไว้ค้างคืน และสถานผดุงครรภ์"], ans: 4 },
                 { id: 56, q: "รัฐมนตรีว่าการกระทรวงสาธารณสุข ไม่มีอำนาจ ดำเนินการในเรื่องใด", choices: ["แต่งตั้งผู้ทรงคุณวุฒิในคณะกรรมการ", "ออกประกาศกำหนดเครื่องมือและอุปกรณ์ทางรังสีเทคนิค", "ออกระเบียบว่าด้วยข้อจำกัดและเงื่อนไข", "ออกกฎกระทรวงกำหนดค่าธรรมเนียมและยกเว้นค่าธรรมเนียม", "แต่งตั้งพนักงานเจ้าหน้าที่"], ans: 3 },
-                { id: 7, q: "กรรมการที่เป็นผู้แทนจากคณะกรรมการวิชาชีพสาขารังสีเทคนิคในคณะกรรมการการประกอบโรคศิลปะมีวาระในการดำรงตำแหน่งคราวละกี่ปี", choices: ["ไม่มีวาระการดำรงตำแหน่ง", "4 ปี", "3 ปี", "2 ปี", "มีวาระตามวาระของกรรมการวิชาชีพ"], ans: 5 },
+                { id: 57, q: "กรรมการที่เป็นผู้แทนจากคณะกรรมการวิชาชีพสาขารังสีเทคนิคในคณะกรรมการการประกอบโรคศิลปะมีวาระในการดำรงตำแหน่งคราวละกี่ปี", choices: ["ไม่มีวาระการดำรงตำแหน่ง", "4 ปี", "3 ปี", "2 ปี", "มีวาระตามวาระของกรรมการวิชาชีพ"], ans: 5 },
                 { id: 58, q: "คณะกรรมการวิชาชีพสาขารังสีเทคนิค ประกอบด้วยผู้แทนจากหน่วยงานต่างๆ ได้แก่หน่วยงานในข้อใด", choices: ["กรมการแพทย์", "กรมสุขภาพจิต", "กรมวิทยาศาสตร์การแพทย์", "กรมควบคุมโรค", "กรมอนามัย"], ans: 3 },
                 { id: 59, q: "นายขาว นักรังสีเทคนิคได้เปิดสถานพยาบาลเพื่อให้บริการเอกซเรย์แก่บุคคลทั่วไปโดยไม่ขออนุญาต จะมีความผิดตามระเบียบว่าด้วยการรักษาจรรยาบรรณแห่งวิชาชีพหรือไม่อย่างไร", choices: ["ไม่ผิดจรรยาบรรณวิชาชีพ เพราะระเบียบฯ ไม่ได้กำหนดไว้", "ผิดจรรยาบรรณแห่งวิชาชีพฐานไม่ปฏิบัติตนเกี่ยวกับสถานพยาบาลตามกฎหมายว่าด้วยสถานพยาบาล", "มีความผิดฐานประกอบกิจการสถานพยาบาลโดยไม่ได้รับอนุญาต", "ผิดจรรยาบรรณแห่งวิชาชีพฐานไม่รักษามาตรฐานของการประกอบโรคศิลปะ", "ไม่ผิดจรรยาบรรณแห่งวิชาชีพแต่ผิดกฎหมายว่าด้วยสถานพยาบาล"], ans: 2 },
                 { id: 60, q: "นายดำได้รับใบอนุญาตให้ประกอบกิจการสถานพยาบาล เมื่อวันที่ 20 สิงหาคม 2553 ใบอนุญาตนี้จะใช้ได้จนถึงวันที่เท่าไร", choices: ["31 ธันวาคม 2572", "31 ธันวาคม 2565", "31 ธันวาคม 2564", "31 ธันวาคม 2571", "31 ธันวาคม 2573"], ans: 4 },
                 { id: 61, q: "ตามกฎหมายว่าด้วยสถานพยาบาล โรงพยาบาลของรัฐจะถูกกำกับ ดูแล ในเรื่องใด", choices: ["การรักษาพยาบาลผู้ป่วยฉุกเฉิน", "การรักษาพยาบาลเด็กและผู้สูงอายุ", "การโฆษณาสถานพยาบาลและการรักษาพยาบาลผู้ป่วย", "คุณภาพและมาตรฐานของสถานพยาบาล", "การโฆษณาสถานพยาบาล"], ans: 4 },
                 { id: 62, q: "การกำหนดเครื่องมือหรืออุปกรณ์ของสาขาการประกอบโรคศิลปะสามารถกระทำได้โดยวิธีการใด", choices: ["กฎกระทรวง", "ประกาศกระทรวง", "ระเบียบกระทรวง", "ประกาศคณะกรรมการ", "ประกาศคณะกรรมการวิชาชีพสาขารังสีเทคนิค"], ans: 2 },
                 { id: 63, q: "คณะกรรมการตามกฎหมายที่มีอำนาจเรียกบุคคลใดๆ มาให้ถ้อยคำหรือให้ส่งเอกสาร หรือวัตถุต่างๆ ที่จำเป็นแก่การดำเนินการตามอำนาจและหน้าที่ ได้แก่คณะกรรมการใดบ้าง", choices: ["คณะกรรมการและคณะอนุกรรมการวิชาชีพที่ทำหน้าที่สอบสวน", "คณะกรรมการวิชาชีพ และคณะอนุกรรมการวิชาชีพทุกคณะ", "คณะกรรมการวิชาชีพ และคณะอนุกรรมการวิชาชีพด้านจัดสอบและขึ้นทะเบียน", "คณะกรรมการและคณะอนุกรรมการวิชาชีพด้านจัดสอบและขึ้นทะเบียน", "คณะกรรมการ คณะกรรมการวิชาชีพและคณะอนุกรรมการวิชาชีพที่ทำหน้าที่จัดสอบ"], ans: 1 },
-                { id: 64, q: "คณะกรรมการการประกอบโรคศิลปะ มีอำนาจออกระเบียบในเรื่องใดตามกฎหมายว่าด้วยการประกอบโรคศิลปะ", choices: ["หลักเกณฑ์และวิธีการกล่าวหา กล่าวโทษและสอบสวน", "หลักเกณฑ์และวิธีการยื่นอุทธรณ์และวิธีพิจารณาอุทธรณ์", "จรรยาบรรณแห่งวิชาชีพของผู้ประกอบโรคศิลปะ", "การเลือก การแต่งตั้ง และการเลือกตั้งกรรมการวิชาชีพ", "ข้อจำกัดและเงื่อนไขในการประกอบโรคศิลปะ"], ans: 1 },
+                { id: 64, q: "คณะกรรมการการประกอบโรคศิลปะ มีอำนาจออกระเบียบในเรื่องใดตามกฎหมายว่าด้วยการประกอบโรคศิลปะ", choices: ["หลักเกณฑ์และวิธีการกล่าวหา กล่าวโทษและสอบสวน", "หลักเกณฑ์และวิธีการยื่นอุทธรณ์และวิธีพิจารณาอุทธรณ์", "จรรยาบรรณแห่งวิชาชีพของผู้ประกอบโรคศิลปะ", "การเลือก การแต่งตั้ง และการเลือกตั้งฯ กรรมการวิชาชีพ", "ข้อจำกัดและเงื่อนไขในการประกอบโรคศิลปะ"], ans: 1 },
                 { id: 65, q: "ผู้ขอขึ้นทะเบียนและรับใบอนุญาตเป็นผู้ประกอบโรคศิลปะจะต้องมีคุณสมบัติและไม่มีลักษณะต้องห้ามตามกฎหมายว่าด้วยการประกอบโรคศิลปะในข้อใด", choices: ["มีอายุไม่ต่ำกว่ายี่สิบปี", "ไม่เป็นคนไร้ความสามารถ", "ไม่เป็นผู้ติดยาเสพติดให้โทษ", "ไม่เป็นบุคคลล้มละลาย", "ไม่เป็นผู้มีร่างกายทุพพลภาพ"], ans: 3 },
                 { id: 66, q: "นายแดง จะทำการวิจัยการใช้รังสีในผู้ป่วยที่เป็นบุคคลไร้ความสามารถ นายแดงจะต้องได้รับความยินยอมจากบุคคลใด", choices: ["ผู้พิทักษ์", "บิดามารดา", "ผู้แทนโดยชอบธรรม", "ผู้อนุบาล", "ผู้ปกครอง"], ans: 4 },
                 { id: 67, q: "นักรังสีเทคนิค ไม่ควร ปฏิบัติหรือไม่พึงกระทำในเรื่องใด", choices: ["ประกอบวิชาชีพโดยคำนึงถึงฐานะ เชื้อชาติ ศาสนา สังคม", "ไม่หลอกลวงผู้ป่วยให้หลงเข้าใจผิดในการประกอบวิชาชีพเพื่อประโยชน์ของตน", "ประกอบวิชาชีพโดยคำนึงถึงความปลอดภัยและความสิ้นเปลืองของผู้ป่วย", "ปฏิบัติตามบรรดากฎหมายของบ้านเมือง", "กระทำการอันเป็นเหตุให้เสื่อมเสียแก่ชาติตระกูลและวิชาชีพ"], ans: 5 },
@@ -189,7 +217,7 @@
                 { id: 117, q: "นางสาวช่อได้สมัครรับเลือกตั้งเป็นกรรมการวิชาชีพ คณะกรรมการได้ตรวจสอบคุณสมบัติพบว่านางสาวช่อเคยถูกพักใช้ใบอนุญาตและเคยเป็นบุคคลล้มละลาย นางสาวช่อจะถูกตัดสิทธิการรับสมัครรับเลือกตั้งหรือไม่ อย่างไร", choices: ["ไม่ถูกตัดสิทธิ เพราะลักษณะต้องห้ามดังกล่าวกฎหมายไม่ได้บังคับใช้กับผู้สมัครรับเลือกตั้งเป็นกรรมการวิชาชีพ", "ถูกตัดสิทธิ เพราะเคยถูกพักใช้ใบอนุญาต", "ถูกตัดสิทธิ เพราะเคยถูกพักใช้ใบอนุญาต และเคยเป็นบุคคลล้มละลาย", "ถูกตัดสิทธิ เพราะเคยเป็นบุคคลล้มละลาย", "ไม่ถูกตัดสิทธิ เพราะปัจจุบันไม่ได้ถูกพักใช้ใบอนุญาต และพ้นจากการเป็นบุคคลล้มละลาย"], ans: 5 },
                 { id: 118, q: "คณะกรรมการการประกอบโรคศิลปะประกอบด้วยผู้แทนจากหน่วยงาน ต่าง ๆ ดังต่อไปนี้ยกเว้นหน่วยงานใด", choices: ["สำนักงานคณะกรรมการกฤษฎีกา", "สำนักงานคณะกรรมการอาหารและยา", "สำนักงานหลักประกันสุขภาพแห่งชาติ", "สำนักงานคณะกรรมการการอุดมศึกษา", "กรมสุขภาพจิต"], ans: 5 },
                 { id: 119, q: "คณะกรรมการการประกอบโรคศิลปะ มีอำนาจออกระเบียบในเรื่องใดตามกฎหมายว่าด้วยการประกอบโรคศิลปะ", choices: ["หลักเกณฑ์และวิธีการกล่าวหา กล่าวโทษ และสอบสวน", "ข้อจำกัดและเงื่อนไขในการประกอบโรคศิลปะ", "การเลือก การแต่งตั้ง และการเลือกตั้งฯ กรรมการวิชาชีพ", "หลักเกณฑ์และวิธีการยื่นอุทธรณ์และวิธีพิจารณาอุทธรณ์", "จรรยาบรรณแห่งวิชาชีพของผู้ประกอบโรคศิลปะ"], ans: 1 },
-                { id: 120, q: "คณะกรรมการเปรียบเทียบคดีมีอำนาจเปรียบเทียบปรับสำหรับความผิดที่เกิดขึ้นในข้อใด", choices: ["เรียกเก็บค่ารักษาพยาบาลเกินอัตราที่แสดงไว้", "ปฏิเสธการช่วยเหลือผู้ป่วยฉุกเฉิน", "ออกใบเสร็จรับเงินเกี่ยวกับการรักษาพยาบาลเป็นเท็จ", "ประกอบกิจการสถานพยาบาลในระหว่างถูกสั่งปิดชั่วคราว", "ไม่จัดให้มีผู้ดำเนินการเป็นผู้ควบคุมดูแลและรับผิดชอบการดำเนินการสถานพยาบาล"], ans: 1 },
+                { id: 120, q: "คณะกรรมการเปรียบเทียบคดีมีอำนาจเปรียบเทียบปรับสำหรับความผิดที่เกิดขึ้นในข้อใด", choices: ["เรียกเก็บค่ารักษาพยาบาลเกินอัตราที่แสดงไว้", "ปฏิเสธการช่วยเหลือผู้ป่วยฉุกเฉิน", "ออกใบรับรองแพทย์เท็จ", "ประกอบกิจการสถานพยาบาลในระหว่างถูกสั่งปิดชั่วคราว", "ไม่จัดให้มีผู้ดำเนินการเป็นผู้ควบคุมดูแลและรับผิดชอบการดำเนินการสถานพยาบาล"], ans: 1 },
                 { id: 121, q: "คณะกรรมการวิชาชีพสาขารังสีเทคนิค ประกอบด้วยผู้แทนจากหน่วยงาน ต่าง ๆ ได้แก่หน่วยงานในข้อใด", choices: ["กรมการแพทย์", "กรมสุขภาพจิต", "กรมควบคุมโรค", "กรมวิทยาศาสตร์การแพทย์", "กรมอนามัย"], ans: 4 },
                 { id: 122, q: "ประธานกรรมการวิชาชีพสาขารังสีเทคนิคได้มาโดยวิธีการใด", choices: ["การเลือก", "การสรรหาของคณะกรรมการสรรหา", "การเลือกตั้ง", "โดยตำแหน่ง", "การแต่งตั้ง"], ans: 1 },
                 { id: 123, q: "ข้อใดเป็นสาขาการประกอบโรคศิลปะตามกฎหมายว่าด้วยการประกอบโรคศิลปะ", choices: ["การแก้ไขการได้ยิน", "ฟิสิกส์การแพทย์", "จิตวิทยาการแพทย์", "รังสีเทคนิคการแพทย์", "การกำหนดอาหาร"], ans: 5 },
@@ -226,8 +254,14 @@
         let currentYear = "2566";
         let examData = {};
         let currentRenderedQuestions = [];
+        let userAnswers = {};
 
-        // 🔀 ฟังก์ชัน Fisher-Yates Shuffle
+        // ลอจิกควบคุมระบบสอบ (Timer States)
+        let isExamMode = false;
+        let isExamSubmitted = false;
+        let examTimer = null;
+        let remainingTime = 0;
+
         function shuffleArray(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -237,13 +271,10 @@
             return arr;
         }
 
-        // 📥 1. ฟังก์ชันโหลดข้อมูลและซิงค์จาก Supabase DB
         async function initExamData() {
-            // ตั้งต้นใช้ข้อมูลเริ่มต้นก่อน
             examData = JSON.parse(JSON.stringify(rawQuestions));
 
             try {
-                // ยิงไปดึงข้อมูลการแก้ไขเฉลยทั้งหมดจาก Supabase ตาราง exam_answers_fixed
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_answers_fixed?select=*`, {
                     method: 'GET',
                     headers: {
@@ -254,8 +285,6 @@
 
                 if (response.ok) {
                     const fixedAnswers = await response.json();
-                    
-                    // นำข้อมูลที่แก้ไขแล้วจาก Cloud มา Override ทับเฉลยเริ่มต้นในสคริปต์
                     fixedAnswers.forEach(fixedItem => {
                         for (const year in examData) {
                             const qIndex = examData[year].findIndex(q => q.id === fixedItem.id);
@@ -267,14 +296,12 @@
                     console.log("Sync เฉลยจาก Supabase สำเร็จ!");
                 }
             } catch (error) {
-                console.error("การโหลดจากฐานข้อมูลล้มเหลว ระบบจะใช้เฉลย Local เริ่มต้นแทน:", error);
+                console.error("การโหลดจากฐานข้อมูลล้มเหลว:", error);
             }
 
-            // แสดงผลข้อสอบของปีตั้งต้น
             switchYear(currentYear);
         }
 
-        // 🔄 เปลี่ยนปีและสลับข้อสอบ
         function switchYear(year) {
             currentYear = year;
             document.getElementById("current-title").innerText = `ชุดข้อสอบประจำปี ${year}`;
@@ -289,24 +316,129 @@
                 activeTab.classList.add("bg-white", "text-indigo-700");
             }
 
+            if (isExamMode) exitExamMode();
             currentRenderedQuestions = shuffleArray(examData[currentYear]);
             renderQuestions();
         }
 
         function resetAndShuffle() {
+            if (isExamMode) exitExamMode();
             currentRenderedQuestions = shuffleArray(examData[currentYear]);
             renderQuestions();
         }
 
-        // 🎨 วาดข้อสอบขึ้นหน้าจอ
+        // ⏳ ควบคุมปุ่มเข้า-ออกโหมดจับเวลา
+        function toggleExamMode() {
+            if (!isExamMode) {
+                if (confirm(`คุณเบียร์ต้องการเปิดโหมดจับเวลาในชุดข้อสอบปี ${currentYear} ใช่ไหมครับ?\nระบบให้เวลาข้อละ 1 นาที เมื่อทำเสร็จกรุณากดส่งข้อสอบด้านล่างสุดครับ`)) {
+                    isExamMode = true;
+                    isExamSubmitted = false;
+                    userAnswers = {};
+                    document.getElementById('result-card').classList.add('hidden');
+                    document.getElementById('submit-area').classList.remove('hidden');
+                    document.getElementById('timer-dashboard').classList.remove('hidden');
+                    
+                    document.getElementById('btn-exam-mode').innerHTML = `<i class="fa-solid fa-circle-stop"></i> ออกจากโหมดสอบ`;
+                    document.getElementById('btn-exam-mode').className = "px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-sm font-medium rounded-xl shadow-sm transition flex items-center gap-1.5";
+                    document.getElementById('info-text').innerHTML = `โหมดจับเวลา: <span class="text-rose-600 font-semibold">เลือกข้อที่ต้องการ ช้อยส์จะไฮไลต์เป็นสีฟ้า และจะแสดงเฉลยเมื่อส่งคำตอบครบถ้วน ⏳</span>`;
+                    
+                    remainingTime = currentRenderedQuestions.length * 60; // 60 วินาทีต่อข้อ
+                    updateClock();
+
+                    clearInterval(examTimer);
+                    examTimer = setInterval(() => {
+                        remainingTime--;
+                        updateClock();
+                        if (remainingTime <= 0) {
+                            clearInterval(examTimer);
+                            alert("⏰ หมดเวลาทำข้อสอบแล้ว! ระบบจะจัดส่งกระดาษคำตอบให้ทันทีครับ");
+                            processScore();
+                        }
+                    }, 1000);
+
+                    renderQuestions();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            } else {
+                if (confirm("คุณเบียร์ต้องการยกเลิกโหมดจับเวลาและกลับสู่โหมดปกติใช่ไหม? (คำตอบปัจจุบันจะถูกล้าง)")) {
+                    exitExamMode();
+                }
+            }
+        }
+
+        function updateClock() {
+            const min = Math.floor(remainingTime / 60);
+            const sec = remainingTime % 60;
+            document.getElementById('countdown-clock').innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+            
+            if (remainingTime < 60) {
+                document.getElementById('timer-dashboard').className = "bg-rose-600 text-white sticky top-[52px] z-40 shadow-sm transition-all";
+            } else {
+                document.getElementById('timer-dashboard').className = "bg-amber-500 text-white sticky top-[52px] z-40 shadow-sm transition-all";
+            }
+        }
+
+        function exitExamMode() {
+            isExamMode = false;
+            isExamSubmitted = false;
+            clearInterval(examTimer);
+            userAnswers = {};
+            document.getElementById('submit-area').classList.add('hidden');
+            document.getElementById('timer-dashboard').classList.add('hidden');
+            document.getElementById('result-card').classList.add('hidden');
+            
+            document.getElementById('btn-exam-mode').innerHTML = `<i class="fa-solid fa-hourglass-start"></i> เริ่มโหมดจับเวลา`;
+            document.getElementById('btn-exam-mode').className = "px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-xl shadow-sm transition flex items-center gap-1.5";
+            document.getElementById('info-text').innerHTML = `ฐานข้อมูล: <span class="text-emerald-600 font-semibold">Supabase Cloud Connected 🟢</span> (สลับข้ออัตโนมัติ)`;
+            
+            renderQuestions();
+        }
+
+        function submitExam() {
+            const currentAnswersCount = Object.keys(userAnswers).length;
+            if (currentAnswersCount < currentRenderedQuestions.length) {
+                if (!confirm(`⚠️ คุณเบียร์ยังทำไม่ครบ (ทำไปแล้ว ${currentAnswersCount} จากทั้งหมด ${currentRenderedQuestions.length} ข้อ)\nต้องการยืนยันส่งข้อสอบเลยใช่ไหมครับ?`)) {
+                    return;
+                }
+            } else {
+                if (!confirm("คุณเบียร์ตรวจทานครบถ้วนและต้องการส่งข้อสอบเพื่อประเมินคะแนนเลยใช่ไหมครับ?")) {
+                    return;
+                }
+            }
+            processScore();
+        }
+
+        function processScore() {
+            clearInterval(examTimer);
+            isExamSubmitted = true;
+            document.getElementById('submit-area').classList.add('hidden');
+            
+            let totalCorrect = 0;
+            currentRenderedQuestions.forEach(item => {
+                if (userAnswers[item.id] !== undefined && userAnswers[item.id] === item.ans) {
+                    totalCorrect++;
+                }
+            });
+
+            document.getElementById('score-display').innerText = `${totalCorrect} / ${currentRenderedQuestions.length}`;
+            document.getElementById('result-card').classList.remove('hidden');
+            
+            renderQuestions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 🎨 วาดข้อสอบขึ้นหน้าจอ (ปรับสไตล์ตามสถานะ Exam Mode)
         function renderQuestions() {
             const container = document.getElementById("questions-container");
             container.innerHTML = "";
 
             currentRenderedQuestions.forEach((item, index) => {
                 const card = document.createElement("div");
-                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4";
+                card.className = "bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4 relative";
                 card.id = `q-card-${item.id}`;
+
+                const chosenAns = userAnswers[item.id];
+                const hasAnswered = chosenAns !== undefined;
 
                 const header = document.createElement("div");
                 header.className = "flex justify-between items-start gap-4";
@@ -326,31 +458,73 @@
                     const choiceNum = cIndex + 1;
                     const choiceBtn = document.createElement("button");
                     choiceBtn.id = `btn-${item.id}-${choiceNum}`;
-                    choiceBtn.className = "text-left px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-sm flex items-start gap-3";
+                    
+                    const isCorrectSolution = choiceNum === item.ans;
+                    const isUserSelection = choiceNum === chosenAns;
+                    
+                    let borderStyle = "border-slate-200 hover:bg-slate-50 text-slate-700 bg-white font-normal";
+
+                    if (isExamMode && !isExamSubmitted) {
+                        // 🌟 ระหว่างทำโหมดสอบ: แสดงสีฟ้าอ่อนข้อที่ถูกคลิก และเปลี่ยนข้อยส์สลับไปมาได้อิสระ
+                        if (isUserSelection) {
+                            borderStyle = "border-2 border-blue-500 bg-blue-50 font-medium ring-1 ring-blue-500";
+                        }
+                    } else {
+                        // โหมดปกติ หรือ โหมดสอบที่ส่งกระดาษคำตอบเพื่อดูคะแนนแล้ว
+                        if (hasAnswered) {
+                            if (isCorrectSolution) {
+                                borderStyle = "border-2 border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold ring-1 ring-emerald-500";
+                            } else if (isUserSelection && !isCorrectSolution) {
+                                borderStyle = "border-2 border-rose-500 bg-rose-50 text-rose-900 font-semibold ring-1 ring-rose-500";
+                            } else {
+                                borderStyle = "border-slate-200 text-slate-400 opacity-60 bg-white pointer-events-auto";
+                            }
+                        }
+                    }
+
+                    choiceBtn.className = `text-left px-4 py-3 rounded-xl border transition text-sm flex items-start gap-3 ${borderStyle}`;
                     choiceBtn.innerHTML = `
                         <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold shrink-0">${choiceNum}</span>
                         <span class="text-slate-700">${choice}</span>
                     `;
-                    choiceBtn.onclick = () => checkAnswer(item.id, choiceNum, item.ans);
+                    
+                    choiceBtn.onclick = () => {
+                        if (isExamSubmitted) return; // ล็อกปุ่มห้ามกดหลังจากส่งกระดาษสอบแล้ว
+                        if (isExamMode) {
+                            userAnswers[item.id] = choiceNum;
+                            renderQuestions();
+                        } else {
+                            checkAnswer(item.id, choiceNum, item.ans);
+                        }
+                    };
                     choicesContainer.appendChild(choiceBtn);
                 });
 
                 card.appendChild(choicesContainer);
 
+                // เฉลยปุ่มกล่องสีฟ้าท้ายช้อยส์
                 const answerFeedback = document.createElement("div");
                 answerFeedback.id = `feedback-${item.id}`;
-                answerFeedback.className = "hidden p-3 rounded-xl text-sm font-medium mt-2";
+                
+                if ((!isExamMode && hasAnswered) || (isExamMode && isExamSubmitted)) {
+                    const isCorrect = chosenAns === item.ans;
+                    answerFeedback.className = `p-3 rounded-xl text-sm font-medium mt-2 ${isCorrect ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}`;
+                    answerFeedback.innerHTML = isCorrect ? `🎉 ถูกต้อง! เฉลยคือข้อที่ <b>${item.ans}</b>` : `❌ ยังไม่ถูก! คำตอบที่ถูกคือข้อที่ <b>${item.ans}</b>`;
+                } else {
+                    answerFeedback.className = "hidden p-3 rounded-xl text-sm font-medium mt-2";
+                }
                 card.appendChild(answerFeedback);
 
                 container.appendChild(card);
             });
         }
 
-        // 🔎 ตรวจคำตอบ
+        // 🔎 ตรวจคำตอบสำหรับโหมดปกติ
         function checkAnswer(questionId, selected, correct) {
+            userAnswers[questionId] = selected;
             for (let i = 1; i <= 5; i++) {
                 const btn = document.getElementById(`btn-${questionId}-${i}`);
-                if (btn) btn.className = "text-left px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-sm flex items-start gap-3";
+                if (btn) btn.className = "text-left px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-sm flex items-start gap-3 text-slate-400 opacity-60";
             }
 
             const feedback = document.getElementById(`feedback-${questionId}`);
@@ -358,14 +532,14 @@
 
             if (selected === correct) {
                 const targetBtn = document.getElementById(`btn-${questionId}-${selected}`);
-                if(targetBtn) targetBtn.className = "text-left px-4 py-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition text-sm flex items-start gap-3 font-medium";
+                if(targetBtn) targetBtn.className = "text-left px-4 py-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition text-sm flex items-start gap-3 font-medium text-emerald-900";
                 feedback.innerHTML = `🎉 ถูกต้อง! เฉลยคือข้อที่ <b>${correct}</b>`;
                 feedback.classList.add("bg-emerald-50", "text-emerald-800");
             } else {
                 const targetBtn = document.getElementById(`btn-${questionId}-${selected}`);
                 const correctBtn = document.getElementById(`btn-${questionId}-${correct}`);
-                if(targetBtn) targetBtn.className = "text-left px-4 py-3 rounded-xl border-2 border-rose-500 bg-rose-50 transition text-sm flex items-start gap-3 font-medium";
-                if(correctBtn) correctBtn.className = "text-left px-4 py-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition text-sm flex items-start gap-3 font-medium";
+                if(targetBtn) targetBtn.className = "text-left px-4 py-3 rounded-xl border-2 border-rose-500 bg-rose-50 transition text-sm flex items-start gap-3 font-medium text-rose-900";
+                if(correctBtn) correctBtn.className = "text-left px-4 py-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition text-sm flex items-start gap-3 font-medium text-emerald-900";
                 feedback.innerHTML = `❌ ยังไม่ถูก! คำตอบที่ถูกคือข้อที่ <b>${correct}</b>`;
                 feedback.classList.add("bg-rose-50", "text-rose-800");
             }
@@ -399,11 +573,10 @@
             cardElement.appendChild(editPanel);
         }
 
-        // 📤 2. ฟังก์ชันอัปเดตและส่งข้อมูลไปบันทึกบน Supabase (Upsert)
+        // 📤 อัปเดตและส่งข้อมูลไปบันทึกบน Supabase (Upsert)
         async function saveAnswerChange(questionId) {
             const newAns = parseInt(document.getElementById(`select-ans-${questionId}`).value);
             
-            // อัปเดตในสคริปต์ปัจจุบัน
             const questionIndex = examData[currentYear].findIndex(item => item.id === questionId);
             if (questionIndex !== -1) {
                 examData[currentYear][questionIndex].ans = newAns;
@@ -414,14 +587,13 @@
                 }
 
                 try {
-                    // ยิง HTTP POST แบบ Upsert (ถ้ามีอยู่แล้วจะ Update ถ้ายังไม่มีจะ Insert)
                     const response = await fetch(`${SUPABASE_URL}/rest/v1/exam_answers_fixed`, {
                         method: 'POST',
                         headers: {
                             'apikey': SUPABASE_ANON_KEY,
                             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                             'Content-Type': 'application/json',
-                            'Prefer': 'resolution=merge-duplicates' // สั่งให้อัปเดตหากพบ Key ซ้ำ
+                            'Prefer': 'resolution=merge-duplicates'
                         },
                         body: JSON.stringify({
                             id: questionId,
@@ -445,12 +617,12 @@
 
         // 👁️ ดูเฉลยทั้งหมด
         function showAllAnswers() {
+            if (isExamMode) exitExamMode();
             currentRenderedQuestions.forEach(item => {
                 checkAnswer(item.id, item.ans, item.ans);
             });
         }
 
-        // เริ่มต้นรันระบบ
         initExamData();
     </script>
 </body>
